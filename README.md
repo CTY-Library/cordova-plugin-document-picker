@@ -4,9 +4,12 @@
 ### https://github.com/iampossible/Cordova-DocPicker.git
 ### cordova-plugin-camera
 
-使用
+使用案例
 
-`uploadVideo(){
+
+
+  uploadVideo(){
+
 
     this.mediaType = this.camera.MediaType.VIDEO;
 
@@ -40,6 +43,7 @@
     }, (error) => { alert(error) },"SAVEDPHOTOALBUM",['video/*'],"");
 
   }
+
 
 
   uploadDocument(){
@@ -80,4 +84,4 @@
     }, (error) => { alert(error) },"DOCUMENT",['*/*'],"");
     
   }
-  `
+  
