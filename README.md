@@ -5,8 +5,8 @@
 ### cordova-plugin-camera
 
 使用
-`
-uploadVideo(){
+
+`uploadVideo(){
     this.mediaType = this.camera.MediaType.VIDEO;
     this.currentType = 'VIDEO';
     CDVDocumentPicker.getFile( (url) => { alert(url);
@@ -43,5 +43,4 @@ uploadVideo(){
       });
       }
     }, (error) => { alert(error) },"DOCUMENT",['*/*'],"");
-  }
-  `
+  }`
