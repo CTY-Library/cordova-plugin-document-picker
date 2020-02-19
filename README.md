@@ -6,7 +6,7 @@
 
 使用
 
-`uploadVideo(){
+`uploadVideo(){`
     this.mediaType = this.camera.MediaType.VIDEO;
     this.currentType = 'VIDEO';
     CDVDocumentPicker.getFile( (url) => { alert(url);
