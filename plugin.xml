@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="cordova-plugin-document-picker"
+    version="1.0.0">
+    <name>CDVDocumentPicker</name>
+    <description>Cordova CDVDocumentPicker Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,CDVDocumentPicker</keywords>
+    <repo>https://github.com/lounai-chen/cordova-plugin-document-picker</repo>
+    <issue>https://github.com/lounai-chen/cordova-plugin-document-picker/issues</issue>
+
+    <engines>
+        <engine name="cordova" version=">=7.1.0"/>
+        <engine name="cordova-android" version=">=6.3.0" />
+    </engines>
+
+    <js-module src="www/CDVDocumentPicker.js" name="CDVDocumentPicker">
+        <clobbers target="CDVDocumentPicker" />
+    </js-module>
+
+     <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="CDVDocumentPicker">
+                <param name="android-package" value="org.apache.cordova.CDVDocumentPicker.CameraLauncher"/>
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        </config-file>
+
+        <source-file src="src/android/CDVDocumentPicker.java" target-dir="src/org/apache/cordova/CDVDocumentPicker" />
+
+        <preference name="ANDROID_SUPPORT_V4_VERSION" default="27.+"/>
+        <framework src="com.android.support:support-v4:$ANDROID_SUPPORT_V4_VERSION"/>
+
+    </platform>
+
+    <!-- ios -->
+    <platform name="ios">
+         <config-file target="config.xml" parent="/*">
+             <feature name="CDVDocumentPicker">
+                 <param name="ios-package" value="CDVDocumentPicker" />
+             </feature>
+             <preference name="DocumentPickerUsesGeolocation" value="false" />
+         </config-file>
+
+         <source-file src="src/ios/CDVDocumentPicker.swift" />
+          
+         <framework src="ImageIO.framework" weak="true" />
+         <framework src="CoreLocation.framework" />
+         <framework src="CoreGraphics.framework" />
+         <framework src="AssetsLibrary.framework" />
+         <framework src="MobileCoreServices.framework" />
+         <framework src="CoreGraphics.framework" />
+         <framework src="AVFoundation.framework" />
+
+        <config-file target="*-Info.plist" parent="Supports opening documents in place">
+            <Boolean>YES</Boolean>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="Application supports iTunes file sharing">
+            <Boolean>YES</Boolean>
+        </config-file>
+
+        <dependency id="cordova-plugin-add-swift-support"  version="2.0.2"/>
+
+     </platform>
+
+ 
+
+ 
+    
+</plugin>

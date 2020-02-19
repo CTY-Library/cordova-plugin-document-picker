@@ -1,0 +1,22 @@
+{
+  "name": "cordova-plugin-document-picker",
+  "version": "1.0.0",
+  "description": "iOS plugin for Cordova writting in Swift.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "cordova",
+    "plugin",
+    "cdvdocumentpicker",
+    "icloud",
+    "filebrowser"
+  ],
+  "author": "",
+  "license": "ISC"
+}
