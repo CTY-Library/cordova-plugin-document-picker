@@ -58,13 +58,13 @@
          <framework src="CoreGraphics.framework" />
          <framework src="AVFoundation.framework" />
 
-        <config-file target="*-Info.plist" parent="Supports opening documents in place">
-            <Boolean>YES</Boolean>
-        </config-file>
+        <!-- <config-file target="*-Info.plist" parent="Supports opening documents in place"> -->
+            <!-- <Boolean>YES</Boolean> -->
+        <!-- </config-file> -->
 
-        <config-file target="*-Info.plist" parent="Application supports iTunes file sharing">
-            <Boolean>YES</Boolean>
-        </config-file>
+        <!-- <config-file target="*-Info.plist" parent="Application supports iTunes file sharing"> -->
+            <!-- <Boolean>YES</Boolean> -->
+        <!-- </config-file> -->
 
         <dependency id="cordova-plugin-add-swift-support"  version="2.0.2"/>
 
