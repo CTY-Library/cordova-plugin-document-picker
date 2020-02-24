@@ -41,12 +41,15 @@ import org.apache.cordova.PluginResult;
 import org.apache.cordova.camera.FileHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class CDVDocumentPicker extends CordovaPlugin {
 
@@ -94,11 +97,20 @@ public class CDVDocumentPicker extends CordovaPlugin {
 
             //Take the values from the arguments if they're not already defined (this is tricky)
             // this.srcType = args.getInt(0); //Android 不需要
-            this.fileTypes = args.getString(1).split(",");
-
-            for(int i=0;i<this.fileTypes.length;i++) {
-              this.fileTypes[0] = this.formatFileType(this.fileTypes[0]);
+            //this.fileTypes = args.getJSONArray(1) ;//"['video/*']".split(",");
+            JSONArray arry = args.getJSONArray(1);
+            if(arry != null && arry.length() > 0){
+              List<String> strlist = new ArrayList();
+              for(int i = 0; i < arry.length(); i++) {
+                strlist.add( this.formatFileType( arry.getString(i) ));
+              }
+              this.fileTypes = new String[strlist.size()];
+              strlist.toArray(this.fileTypes);
+            } else {
+              callbackContext.error("Illegal Argument Exception");
+              return  true;
             }
+
 
 			      this.title = args.getString(2);
             this.allowEdit = false;
