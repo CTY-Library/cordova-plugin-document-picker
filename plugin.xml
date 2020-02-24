@@ -24,7 +24,7 @@
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="CDVDocumentPicker">
-                <param name="android-package" value="org.apache.cordova.CDVDocumentPicker.CameraLauncher"/>
+                <param name="android-package" value="org.apache.cordova.CDVDocumentPicker"/>
             </feature>
         </config-file>
 
