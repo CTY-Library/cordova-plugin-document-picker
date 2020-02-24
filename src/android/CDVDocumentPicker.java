@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.content.FileProvider;
@@ -37,6 +38,7 @@ import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.LOG;
 import org.apache.cordova.PermissionHelper;
 import org.apache.cordova.PluginResult;
+import org.apache.cordova.camera.FileHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -53,7 +55,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
 
     public static final int PERMISSION_DENIED_ERROR = 20;
     public static final int SAVE_TO_ALBUM_SEC = 1;
-	public static final int DOCUMENT_PICKER = 111;
+	  public static final int DOCUMENT_PICKER = 111;
 
     private static final String LOG_TAG = "CDVDocumentPicker";
 
@@ -78,6 +80,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
      * @param callbackContext   The callback id used when calling back into JavaScript.
      * @return                  A PluginResult object with a status and message.
      */
+    @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         this.callbackContext = callbackContext;
         //Adding an API to CoreAndroid to get the BuildConfigValue
@@ -91,13 +94,13 @@ public class CDVDocumentPicker extends CordovaPlugin {
 
             //Take the values from the arguments if they're not already defined (this is tricky)
             // this.srcType = args.getInt(0); //Android 不需要
-            this.fileTypes = args.getStringArray(1);
+            this.fileTypes = args.getString(1).split(",");
 
-			for(int i=0;i<this.fileTypes.length;i++) {
-				this.fileTypes[0] = this.formatFileType(this.fileTypes[0]);
-			}
+            for(int i=0;i<this.fileTypes.length;i++) {
+              this.fileTypes[0] = this.formatFileType(this.fileTypes[0]);
+            }
 
-			this.title = args.getString(2);
+			      this.title = args.getString(2);
             this.allowEdit = false;
 
             try {
@@ -135,22 +138,21 @@ public class CDVDocumentPicker extends CordovaPlugin {
     // TODO: Images selected from SDCARD don't display correctly, but from CAMERA ALBUM do!
     public void getFile(int srcType, String title) {
         Intent intent = new Intent();
-        String title = title;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-			intent.setType(this.fileTypes.length == 1 ? this.fileTypes[0] : "*/*");
-			if (this.fileTypes.length > 0) {
-			   intent.putExtra(Intent.EXTRA_MIME_TYPES, this.fileTypes);
-			}
-		} else {
-			String this.fileTypesStr = "";
-			for (String mimeType : this.fileTypes) {
-				this.fileTypesStr += mimeType + "|";
-			}
-			intent.setType(this.fileTypesStr.substring(0,this.fileTypesStr.length() - 1));
-		}
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+          intent.setType(this.fileTypes.length == 1 ? this.fileTypes[0] : "*/*");
+          if (this.fileTypes.length > 0) {
+             intent.putExtra(Intent.EXTRA_MIME_TYPES, this.fileTypes);
+          }
+        } else {
+          String fileTypesStr = "";
+          for (String mimeType : this.fileTypes) {
+            fileTypesStr += mimeType + "|";
+          }
+          intent.setType(fileTypesStr.substring(0,fileTypesStr.length() - 1));
+        }
 
-		intent.setAction(Intent.ACTION_GET_CONTENT);
-		intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         if (this.cordova != null) {
             this.cordova.startActivityForResult((CordovaPlugin) this, Intent.createChooser(intent,
                     new String(title)), DOCUMENT_PICKER);
@@ -223,14 +225,14 @@ public class CDVDocumentPicker extends CordovaPlugin {
         Bundle state = new Bundle();
         state.putString("title", this.title);
         state.putInt("srcType", this.srcType);
-        state.putInt("fileTypes", this.fileTypes);
-		state.putBoolean("allowEdit", this.allowEdit);
+        state.putString("fileTypes", this.fileTypes[0]);
+		    state.putBoolean("allowEdit", this.allowEdit);
 
         return state;
     }
 
     public void onRestoreStateForActivityResult(Bundle state, CallbackContext callbackContext) {
-        this.title = state.getInt("title");
+        this.title = state.getString("title");
         this.srcType = state.getInt("srcType");
         this.fileTypes = state.getStringArray("fileTypes");
         this.allowEdit = state.getBoolean("allowEdit");
@@ -239,39 +241,41 @@ public class CDVDocumentPicker extends CordovaPlugin {
     }
 
 	private String formatFileType(String filetype){
+      String ret = "";
 		switch (filetype) {
         case "pdf":
         case "com.adobe.pdf":
-            return "application/pdf";
+          ret =  "application/pdf";
             break;
         case "doc":
         case "com.microsoft.word.doc":
-            return "application/msword";
+          ret = "application/msword";
             break;
         case "docx":
         case "org.openxmlformats.wordprocessingml.document":
-            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+          ret = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
             break;
         case "xls":
         case "com.microsoft.excel.xls":
-            return "application/vnd.ms-excel";
+          ret = "application/vnd.ms-excel";
             break;
         case "xlsx":
         case "org.openxmlformats.spreadsheetml.sheet":
-            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+          ret = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             break;
         case "ppt":
         case "com.microsoft.powerpoint.​ppt":
-            return "application/mspowerpoint";
+          ret = "application/mspowerpoint";
             break;
         case "pptx":
         case "org.openxmlformats.presentationml.presentation":
-            return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+          ret = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
             break;
         default:
-            return filetype;
+          ret = filetype;
             break;
-        }				
+        }
+        return  ret;
 	}
      /*
       * This is dirty, but it does the job.
