@@ -277,7 +277,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
             break;
         case "ppt":
         case "com.microsoft.powerpoint.​ppt":
-          ret = "application/mspowerpoint";
+          ret = "application/vnd.ms-powerpoint";
             break;
         case "pptx":
         case "org.openxmlformats.presentationml.presentation":
