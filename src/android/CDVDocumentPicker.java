@@ -16,7 +16,7 @@
        specific language governing permissions and limitations
        under the License.
 */
-package org.apache.cordova.CDVDocumentPicker;
+package com.plugin.aliyun;
 
 import android.Manifest;
 import android.app.Activity;
