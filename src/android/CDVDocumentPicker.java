@@ -295,39 +295,63 @@ public class CDVDocumentPicker extends CordovaPlugin {
 
 	private String formatFileType(String filetype){
       String ret = "";
-		switch (filetype) {
-        case "pdf":
-        case "com.adobe.pdf":
-          ret =  "application/pdf";
-            break;
-        case "doc":
-        case "com.microsoft.word.doc":
-          ret = "application/msword";
-            break;
-        case "docx":
-        case "org.openxmlformats.wordprocessingml.document":
-          ret = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            break;
-        case "xls":
-        case "com.microsoft.excel.xls":
-          ret = "application/vnd.ms-excel";
-            break;
-        case "xlsx":
-        case "org.openxmlformats.spreadsheetml.sheet":
-          ret = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            break;
-        case "ppt":
-        case "com.microsoft.powerpoint.​ppt":
-          ret = "application/vnd.ms-powerpoint";
-            break;
-        case "pptx":
-        case "org.openxmlformats.presentationml.presentation":
-          ret = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-            break;
-        default:
-          ret = filetype;
-            break;
-        }
+      if(filetype.equals("pdf") || filetype.equals("com.adobe.pdf")){
+        ret =  "application/pdf";
+      }
+      else if(filetype.equals("doc") || filetype.equals("com.microsoft.word.doc")) {
+        ret =  "application/msword";
+      }
+      else if(filetype.equals("docx") || filetype.equals("org.openxmlformats.wordprocessingml.document")) {
+        ret =  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      }
+      else if(filetype.equals("xls") || filetype.equals("com.microsoft.excel.xls")) {
+        ret =  "application/vnd.ms-excel";
+      }
+      else if(filetype.equals("xlsx") || filetype.equals("org.openxmlformats.spreadsheetml.sheet")) {
+        ret =  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      }
+      else if(filetype.equals("ppt") || filetype.equals("com.microsoft.powerpoint.​ppt")) {
+        ret =  "application/vnd.ms-powerpoint";
+      }
+      else if(filetype.equals("pptx") || filetype.equals("org.openxmlformats.presentationml.presentation")) {
+        ret =  "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+      }
+      else{
+        ret = filetype;
+      }
+//		switch (filetype) {
+//        case "pdf":
+//        case "com.adobe.pdf":
+//          ret =  "application/pdf";
+//            break;
+//        case "doc":
+//        case "com.microsoft.word.doc":
+//          ret = "application/msword";
+//            break;
+//        case "docx":
+//        case "org.openxmlformats.wordprocessingml.document":
+//          ret = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+//            break;
+//        case "xls":
+//        case "com.microsoft.excel.xls":
+//          ret = "application/vnd.ms-excel";
+//            break;
+//        case "xlsx":
+//        case "org.openxmlformats.spreadsheetml.sheet":
+//          ret = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+//            break;
+//        case "ppt":
+//        case "com.microsoft.powerpoint.​ppt":
+//          ret = "application/vnd.ms-powerpoint";
+//            break;
+//        case "pptx":
+//        case "org.openxmlformats.presentationml.presentation":
+//          ret = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+//            break;
+//        default:
+//          ret = filetype;
+//            break;
+//        }
         return  ret;
 	}
      /*
