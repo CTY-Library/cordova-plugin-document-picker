@@ -51,6 +51,7 @@ import java.util.List;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import android.content.ClipData;
+import java.io.UnsupportedEncodingException;
 
 public class CDVDocumentPicker extends CordovaPlugin {
 
@@ -214,8 +215,9 @@ public class CDVDocumentPicker extends CordovaPlugin {
           List<String> pathList=new ArrayList<>();
           for (int i = 0; i < clipData.getItemCount(); i++) {
             ClipData.Item item = clipData.getItemAt(i);
-            Uri uri = item.getUri();
-            String decoderUrl = URLEncoder.encode(uri.toString(), "UTF-8");
+            Uri a_uri = item.getUri();
+            //String decoderUrl =java.net.URLEncoder.encode(a_uri.toString(), "UTF-8");   
+            String decoderUrl  = a_uri.toString().replaceAll("'","\\'");         
             pathList.add(decoderUrl);
           }
           String[] urls = new String[pathList.size()];
