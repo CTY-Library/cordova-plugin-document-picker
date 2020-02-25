@@ -6,9 +6,7 @@
        to you under the Apache License, Version 2.0 (the
        "License"); you may not use this file except in compliance
        with the License.  You may obtain a copy of the License at
-
          http://www.apache.org/licenses/LICENSE-2.0
-
        Unless required by applicable law or agreed to in writing,
        software distributed under the License is distributed on an
        "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -68,6 +66,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
     private String title;                   
     private int srcType;                    // Destination type (needs to be saved for permission handling)
     private boolean allowEdit;              // Should we allow the user to crop the image.
+    private boolean isMultiple;
 
     protected final static String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
 
@@ -104,6 +103,9 @@ public class CDVDocumentPicker extends CordovaPlugin {
               for(int i = 0; i < arry.length(); i++) {
                 strlist.add( this.formatFileType( arry.getString(i) ));
               }
+              if(strlist.size() == 1 && strlist.get(0) == "*/*"){
+                strlist.add("file/*");
+              }
               this.fileTypes = new String[strlist.size()];
               strlist.toArray(this.fileTypes);
             } else {
@@ -113,6 +115,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
 
 
 			      this.title = args.getString(2);
+            this.isMultiple =  Boolean.parseBoolean(args.getString(3));
             this.allowEdit = false;
 
             try {
@@ -151,7 +154,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
     public void getFile(int srcType, String title) {
         Intent intent = new Intent();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-          intent.setType(this.fileTypes.length == 1 ? this.fileTypes[0] : "*/*");
+          intent.setType(this.fileTypes.length == 1 ? this.fileTypes[0] : "file/*");
           if (this.fileTypes.length > 0) {
              intent.putExtra(Intent.EXTRA_MIME_TYPES, this.fileTypes);
           }
@@ -161,6 +164,10 @@ public class CDVDocumentPicker extends CordovaPlugin {
             fileTypesStr += mimeType + "|";
           }
           intent.setType(fileTypesStr.substring(0,fileTypesStr.length() - 1));
+        }
+
+        if(this.isMultiple){
+          intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // 可以多选
         }
 
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -180,8 +187,8 @@ public class CDVDocumentPicker extends CordovaPlugin {
      * @param intent      An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
-		if (resultCode == Activity.RESULT_OK && intent != null) {
+    //单选
+		if (resultCode == Activity.RESULT_OK && intent != null &&  intent.getData() != null) {
 			final Intent i = intent;
 			 Uri uri = intent.getData();
 			if (uri == null) {
@@ -193,14 +200,33 @@ public class CDVDocumentPicker extends CordovaPlugin {
 			LOG.d(LOG_TAG, "File location is: " + fileLocation);
 
 			String uriString = uri.toString();
-			 LOG.d(LOG_TAG, "File URI is: " + uriString);
+			LOG.d(LOG_TAG, "File URI is: " + uriString);
 			this.callbackContext.success(fileLocation);
 			
-		} else if (resultCode == Activity.RESULT_CANCELED) {
-			this.failFile("No File Selected");
-		} else {
-			this.failFile("Selection did not complete!");
 		}
+		else {
+        //长按使用多选的情况
+        ClipData clipData = data.getClipData();
+        if (clipData != null) {
+          List<String> pathList=new ArrayList<>();
+          for (int i = 0; i < clipData.getItemCount(); i++) {
+            ClipData.Item item = clipData.getItemAt(i);
+            Uri uri = item.getUri();
+            String decoderUrl = URLEncoder.encode(uri, "UTF-8");
+            pathList.add(decoderUrl);
+          }
+          String[] urls = new String[pathList.size()];
+          pathList.toArray(urls);
+
+          LOG.d(LOG_TAG, "Files URI is: " + urls.toString());
+          this.callbackContext.success(urls.toString());
+        }
+        else if (resultCode == Activity.RESULT_CANCELED) {
+            this.failFile("No File Selected");
+        } else {
+            this.failFile("Selection did not complete!");
+        }
+      }
     }
 
 

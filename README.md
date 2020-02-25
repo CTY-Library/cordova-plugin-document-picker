@@ -17,7 +17,7 @@
 
     CDVDocumentPicker.getFile( (url) => { alert(url);
 
-      if(this.Util.isIOS){
+      
 
         if(url.indexOf("file:///")>= 0){
 
@@ -38,9 +38,9 @@
   
       });
 
-      }   
+ 
 
-    }, (error) => { alert(error) },"SAVEDPHOTOALBUM",['video/*'],"");
+    }, (error) => { alert(error) },"SAVEDPHOTOALBUM",['video/*',"doc"],"",true);
 
   }
 

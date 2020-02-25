@@ -13,6 +13,7 @@ class CDVDocumentPicker : CDVPlugin {
 			//title:   弹出框的Title,IOS不需要
             var srcType: String  = ""
             var fileTypes: [String] = []
+            var isMultiple: Bool = false
 			self.commandCallback = command.callbackId
             
 			if command.arguments.isEmpty || command.arguments.count < 2{
@@ -26,8 +27,8 @@ class CDVDocumentPicker : CDVPlugin {
                 }
                 
                 if let key = command.arguments[1] as? String {
-                    let type  = self.formatDocType(fileType: key)
-                    fileTypes.append(type)
+                        let type  = self.formatDocType(fileType: key)
+                        fileTypes.append(type)
                 } else if let array = command.arguments[1] as? [String] {
                     fileTypes = array.compactMap { self.formatDocType(fileType: $0) }
                 }
@@ -36,11 +37,13 @@ class CDVDocumentPicker : CDVPlugin {
                     fileTypes.append("*/*")
 					//self.sendError("Didn't receive any filetypes argument.")
 				}
+                
+                isMultiple =  command.arguments[3] as! Bool
 					
                 if srcType == "DOCUMENT" {
-                    self.callPicker(withTypes: fileTypes)
+                    self.callPicker(withTypes: fileTypes, multiple: isMultiple)
                 } else {
-                    self.callImagePicker(srcType:srcType, withTypes: fileTypes)
+                    self.callImagePicker(srcType:srcType, withTypes: fileTypes, multiple: isMultiple)
                 }
 				
 			}
@@ -79,8 +82,8 @@ class CDVDocumentPicker : CDVPlugin {
 				return "com.microsoft.excel.xls"
 			case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx":
 				return "org.openxmlformats.spreadsheetml.sheet"
-			case "application/mspowerpoint", "ppt":
-				return "com.microsoft.powerpoint.​ppt"
+			case "application/mspowerpoint", "ppt","application/vnd.ms-powerpoint":
+                  return "com.microsoft.powerpoint.ppt"
 			case "application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx":
 				return "org.openxmlformats.presentationml.presentation"
 			default:
@@ -88,14 +91,14 @@ class CDVDocumentPicker : CDVPlugin {
 		}	
 	}
 	
-    func callPicker(withTypes documentTypes: [String]) {
+    func callPicker(withTypes documentTypes: [String], multiple isMultiple:Bool) {
 	
         DispatchQueue.main.async {
 
-            let picker = UIDocumentPickerViewController(documentTypes: documentTypes, in: .open)  //.import
+            let picker = UIDocumentPickerViewController(documentTypes: documentTypes, in: .import)  //.import //open
             picker.delegate = self
             if #available(iOS 11.0, *) {
-                picker.allowsMultipleSelection = false
+                picker.allowsMultipleSelection = isMultiple
             } else {
                 // Fallback on earlier versions
             };
@@ -104,7 +107,7 @@ class CDVDocumentPicker : CDVPlugin {
         }
     }
 	
-    func callImagePicker(srcType: String, withTypes documentTypes: [String]) {
+    func callImagePicker(srcType: String, withTypes documentTypes: [String], multiple isMultiple:Bool) {
 
         DispatchQueue.main.async {
 			let imagePickerController = UIImagePickerController()
@@ -115,6 +118,7 @@ class CDVDocumentPicker : CDVPlugin {
 			//设置image picker的用户界面
 			imagePickerController.sourceType = srcType == "PHOTOLIBRARY" ? .photoLibrary : .savedPhotosAlbum //或者.savedPhotosAlbum
 			imagePickerController.mediaTypes =  documentTypes   //[kUTTypeMovie as String]
+           // imagePickerController.mul = isMultiple;
 			//设置图片选择控制器导航栏的背景颜色
 		  //  imagePickerController.navigationBar.barTintColor = UIColor.orange
 			//设置图片选择控制器导航栏的标题颜色
