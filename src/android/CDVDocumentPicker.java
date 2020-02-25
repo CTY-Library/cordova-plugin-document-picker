@@ -48,6 +48,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import android.content.ClipData;
 
 public class CDVDocumentPicker extends CordovaPlugin {
 
@@ -206,13 +209,13 @@ public class CDVDocumentPicker extends CordovaPlugin {
 		}
 		else {
         //长按使用多选的情况
-        ClipData clipData = data.getClipData();
+        ClipData clipData = intent.getClipData();
         if (clipData != null) {
           List<String> pathList=new ArrayList<>();
           for (int i = 0; i < clipData.getItemCount(); i++) {
             ClipData.Item item = clipData.getItemAt(i);
             Uri uri = item.getUri();
-            String decoderUrl = URLEncoder.encode(uri, "UTF-8");
+            String decoderUrl = URLEncoder.encode(uri.toString(), "UTF-8");
             pathList.add(decoderUrl);
           }
           String[] urls = new String[pathList.size()];
