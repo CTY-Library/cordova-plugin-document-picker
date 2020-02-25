@@ -35,8 +35,7 @@
         <source-file src="src/android/CDVDocumentPicker.java" target-dir="src/com/plugin/document/CDVDocumentPicker" />
         <source-file src="src/android/CDVFileHelper.java" target-dir="src/com/plugin/document/CDVDocumentPicker" />
 
-        <preference name="ANDROID_SUPPORT_V4_VERSION" default="27.+"/>
-        <framework src="com.android.support:support-v4:$ANDROID_SUPPORT_V4_VERSION"/>
+    
 
     </platform>
 

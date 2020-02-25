@@ -28,7 +28,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.content.FileProvider;
+
 
 import org.apache.cordova.BuildHelper;
 import org.apache.cordova.CallbackContext;
