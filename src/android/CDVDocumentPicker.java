@@ -192,7 +192,8 @@ public class CDVDocumentPicker extends CordovaPlugin {
      */
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
     //单选
-		if (resultCode == Activity.RESULT_OK && intent != null &&  intent.getData() != null) {
+		if (resultCode == Activity.RESULT_OK && intent != null ){
+		  if(intent.getData() != null) {
 			final Intent i = intent;
 			 Uri uri = intent.getData();
 			if (uri == null) {
@@ -209,28 +210,37 @@ public class CDVDocumentPicker extends CordovaPlugin {
 			
 		}
 		else {
-        //长按使用多选的情况
-        ClipData clipData = intent.getClipData();
-        if (clipData != null) {
-          List<String> pathList=new ArrayList<>();
-          for (int i = 0; i < clipData.getItemCount(); i++) {
-            ClipData.Item item = clipData.getItemAt(i);
-            Uri a_uri = item.getUri();
-            //String decoderUrl =java.net.URLEncoder.encode(a_uri.toString(), "UTF-8");   
-            String decoderUrl  = a_uri.toString().replaceAll("'","\\'");         
-            pathList.add(decoderUrl);
-          }
-          String[] urls = new String[pathList.size()];
-          pathList.toArray(urls);
+          //长按使用多选的情况
+          ClipData clipData = intent.getClipData();
+          if (clipData != null  && clipData.getItemCount() > 0) {
+            String str_urls = "[";
+            for (int i = 0; i < clipData.getItemCount(); i++) {
+              ClipData.Item item = clipData.getItemAt(i);
+              Uri a_uri = item.getUri();
+              String locfile = FileHelper.getRealPath(a_uri, this.cordova);
+              //String decoderUrl =java.net.URLEncoder.encode(a_uri.toString(), "UTF-8");
+              str_urls += "'" + locfile.replaceAll("'","\\'") + "'";
+              if( i != clipData.getItemCount() -1){
+                str_urls += ",";
+              }
 
-          LOG.d(LOG_TAG, "Files URI is: " + urls.toString());
-          this.callbackContext.success(urls.toString());
-        }
-        else if (resultCode == Activity.RESULT_CANCELED) {
-            this.failFile("No File Selected");
-        } else {
+            }
+            str_urls += "]";
+
+            LOG.d(LOG_TAG, "Files URI is: " + str_urls);
+            this.callbackContext.success(str_urls);
+          }
+          else {
             this.failFile("Selection did not complete!");
+          }
         }
+
+      }
+      else if (resultCode == Activity.RESULT_CANCELED) {
+        this.failFile("No File Selected");
+      }
+      else {
+        this.failFile("Selection did not complete!");
       }
     }
 
@@ -270,7 +280,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
         state.putInt("srcType", this.srcType);
         state.putString("fileTypes", this.fileTypes[0]);
 		    state.putBoolean("allowEdit", this.allowEdit);
-
+        state.putBoolean("isMultiple", this.isMultiple);
         return state;
     }
 
@@ -279,7 +289,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
         this.srcType = state.getInt("srcType");
         this.fileTypes = state.getStringArray("fileTypes");
         this.allowEdit = state.getBoolean("allowEdit");
-
+        this.isMultiple = state.getBoolean("isMultiple");
         this.callbackContext = callbackContext;
     }
 

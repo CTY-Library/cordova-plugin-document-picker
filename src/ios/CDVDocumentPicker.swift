@@ -4,7 +4,7 @@ import Photos
 @objc(CDVDocumentPicker)
 class CDVDocumentPicker : CDVPlugin {
     var commandCallback: String?
-    
+    var isMultiple: Bool = false
     @objc(getFile:)
     func getFile(command: CDVInvokedUrlCommand) {
         DispatchQueue.global(qos: .background).async {
@@ -13,7 +13,7 @@ class CDVDocumentPicker : CDVPlugin {
 			//title:   弹出框的Title,IOS不需要
             var srcType: String  = ""
             var fileTypes: [String] = []
-            var isMultiple: Bool = false
+            
 			self.commandCallback = command.callbackId
             
 			if command.arguments.isEmpty || command.arguments.count < 2{
@@ -38,12 +38,12 @@ class CDVDocumentPicker : CDVPlugin {
 					//self.sendError("Didn't receive any filetypes argument.")
 				}
                 
-                isMultiple =  command.arguments[3] as! Bool
+                self.isMultiple =  command.arguments[3] as! Bool
 					
                 if srcType == "DOCUMENT" {
-                    self.callPicker(withTypes: fileTypes, multiple: isMultiple)
+                    self.callPicker(withTypes: fileTypes, multiple: self.isMultiple)
                 } else {
-                    self.callImagePicker(srcType:srcType, withTypes: fileTypes, multiple: isMultiple)
+                    self.callImagePicker(srcType:srcType, withTypes: fileTypes, multiple: self.isMultiple)
                 }
 				
 			}
@@ -135,6 +135,21 @@ class CDVDocumentPicker : CDVPlugin {
         self.sendResult(.init(status: CDVCommandStatus_OK, messageAs: document.absoluteString))
         self.commandCallback = nil
     }
+    
+    func documentsWasSelected(documents: [URL]) {
+        var str_urls: String = "["
+        var i: Int = 0
+        for u in documents {
+            str_urls.append("'" + u.absoluteString.replacingOccurrences(of: "'", with: "\\'", options: String.CompareOptions.caseInsensitive) + "'")
+            if(i<documents.count-1){
+                str_urls.append(",")
+            }
+            i+=1
+        }
+        str_urls.append("]")
+        self.sendResult(.init(status: CDVCommandStatus_OK, messageAs: str_urls))
+        self.commandCallback = nil
+       }
 
     func sendError(_ message: String) {
         sendResult(.init(status: CDVCommandStatus_ERROR, messageAs: message))
@@ -156,8 +171,12 @@ extension CDVDocumentPicker: UIDocumentPickerDelegate {
 
     @available(iOS 11.0, *)
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        if let url = urls.first {
-            documentWasSelected(document: url)
+        if(urls.count > 1 && self.isMultiple){
+            documentsWasSelected(documents: urls)
+        }else {
+            if let url = urls.first {
+                documentWasSelected(document: url)
+            }
         }
     }
 
