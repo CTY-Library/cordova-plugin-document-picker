@@ -14,7 +14,7 @@
        specific language governing permissions and limitations
        under the License.
 */
-package com.document.CDVDocumentPicker;
+package com.document.cdvdocumentpicker;
 
 import android.Manifest;
 import android.app.Activity;
