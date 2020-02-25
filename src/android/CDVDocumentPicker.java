@@ -14,7 +14,7 @@
        specific language governing permissions and limitations
        under the License.
 */
-package com.plugin.aliyun;
+package com.document.CDVDocumentPicker;
 
 import android.Manifest;
 import android.app.Activity;
@@ -36,7 +36,7 @@ import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.LOG;
 import org.apache.cordova.PermissionHelper;
 import org.apache.cordova.PluginResult;
-import org.apache.cordova.camera.FileHelper;
+ 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -201,7 +201,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
 				return;
 			}
 
-			String fileLocation = FileHelper.getRealPath(uri, this.cordova);
+			String fileLocation = CDVFileHelper.getRealPath(uri, this.cordova);
 			LOG.d(LOG_TAG, "File location is: " + fileLocation);
 
 			String uriString = uri.toString();
@@ -217,7 +217,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
             for (int i = 0; i < clipData.getItemCount(); i++) {
               ClipData.Item item = clipData.getItemAt(i);
               Uri a_uri = item.getUri();
-              String locfile = FileHelper.getRealPath(a_uri, this.cordova);
+              String locfile = CDVFileHelper.getRealPath(a_uri, this.cordova);
               //String decoderUrl =java.net.URLEncoder.encode(a_uri.toString(), "UTF-8");
               str_urls += "'" + locfile.replaceAll("'","\\'") + "'";
               if( i != clipData.getItemCount() -1){
