@@ -201,11 +201,9 @@ public class CDVDocumentPicker extends CordovaPlugin {
 				return;
 			}
 
-			String fileLocation = CDVFileHelper.getRealPath(uri, this.cordova);
+			String fileLocation = com.plugin.document.CDVFileHelper.getRealPath(uri, this.cordova);
 			LOG.d(LOG_TAG, "File location is: " + fileLocation);
 
-			String uriString = uri.toString();
-			LOG.d(LOG_TAG, "File URI is: " + uriString);
 			this.callbackContext.success(fileLocation);
 			
 		}
@@ -217,7 +215,7 @@ public class CDVDocumentPicker extends CordovaPlugin {
             for (int i = 0; i < clipData.getItemCount(); i++) {
               ClipData.Item item = clipData.getItemAt(i);
               Uri a_uri = item.getUri();
-              String locfile = CDVFileHelper.getRealPath(a_uri, this.cordova);
+              String locfile = com.plugin.document.CDVFileHelper.getRealPath(a_uri, this.cordova);
               //String decoderUrl =java.net.URLEncoder.encode(a_uri.toString(), "UTF-8");
               str_urls += "'" + locfile.replaceAll("'","\\'") + "'";
               if( i != clipData.getItemCount() -1){
