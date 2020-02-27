@@ -5,6 +5,7 @@ import Photos
 class CDVDocumentPicker : CDVPlugin {
     var commandCallback: String?
     var isMultiple: Bool = false
+    var isCompress: Bool = true
     @objc(getFile:)
     func getFile(command: CDVInvokedUrlCommand) {
         DispatchQueue.global(qos: .background).async {
@@ -13,7 +14,7 @@ class CDVDocumentPicker : CDVPlugin {
 			//title:   弹出框的Title,IOS不需要
             var srcType: String  = ""
             var fileTypes: [String] = []
-            
+            self.isCompress = true //true 要压缩
 			self.commandCallback = command.callbackId
             
 			if command.arguments.isEmpty || command.arguments.count < 2{
@@ -39,6 +40,9 @@ class CDVDocumentPicker : CDVPlugin {
 				}
                 
                 self.isMultiple =  command.arguments[3] as! Bool
+                if command.arguments.count>4{
+                    self.isCompress = command.arguments[4] as! Bool
+                }
 					
                 if srcType == "DOCUMENT" {
                     self.callPicker(withTypes: fileTypes, multiple: self.isMultiple)
@@ -118,6 +122,8 @@ class CDVDocumentPicker : CDVPlugin {
 			//设置image picker的用户界面
 			imagePickerController.sourceType = srcType == "PHOTOLIBRARY" ? .photoLibrary : .savedPhotosAlbum //或者.savedPhotosAlbum
 			imagePickerController.mediaTypes =  documentTypes   //[kUTTypeMovie as String]
+            imagePickerController.videoQuality = UIImagePickerControllerQualityType.typeHigh
+            //imagePickerController.for
            // imagePickerController.mul = isMultiple;
 			//设置图片选择控制器导航栏的背景颜色
 		  //  imagePickerController.navigationBar.barTintColor = UIColor.orange
@@ -126,6 +132,10 @@ class CDVDocumentPicker : CDVPlugin {
 			//设置图片选择控制器导航栏中按钮的文字颜色
 		//    imagePickerController.navigationBar.tintColor = UIColor.white
 			//显示图片选择控制器
+            if #available(iOS 11.0, *) , self.isCompress==false {
+                imagePickerController.videoExportPreset = AVAssetExportPresetPassthrough
+            }
+            
             self.viewController.present(imagePickerController, animated: true, completion: nil)
 
         }
@@ -193,18 +203,44 @@ extension CDVDocumentPicker: UIImagePickerControllerDelegate, UINavigationContro
   //选择图片成功后代理
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
  
+//       let group = DispatchGroup();
+//        let  queueRequest = DispatchQueue.global();
+//
+//       queueRequest.async(group:group){
+            
         //选择图片的引用路径
-        var pickedURL = info["UIImagePickerControllerImageURL"] as? URL
-        if pickedURL == nil {
-            pickedURL =  info["UIImagePickerControllerMediaURL"] as? URL
+            var pickedURL = info["UIImagePickerControllerImageURL"] as? URL
+    //        if  pickedURL == nil {
+    //            pickedURL =  info["UIImagePickerControllerReferenceURL"] as? URL
+    //        }
+    //
+            if pickedURL == nil  {
+                pickedURL =  info["UIImagePickerControllerMediaURL"] as? URL
+            }
+        if #available(iOS 13.0, *), self.isCompress {
+                pickedURL = self.createTemporaryURLforVideoFile(url: pickedURL as! URL)
         }
-        if pickedURL == nil {
-             sendError("No File selected.")
+        
+        if #available(iOS 13.0, *), self.isCompress == false {
+                if let phasset = info["UIImagePickerControllerPHAsset"] as? PHAsset {
+                   PHCachingImageManager().requestAVAsset(forVideo: phasset as PHAsset, options:nil, resultHandler: { (asset, audioMix, info) in
+
+                        let avurl = asset as! AVURLAsset;
+                        self.documentWasSelected(document: avurl.url )
+                   })
+                }
         }
-        self.documentWasSelected(document: pickedURL ?? info[UIImagePickerControllerMediaURL] as! URL)
+        else{
+            if pickedURL == nil {
+                self.sendError("No File selected.")
+            }
+
+            self.documentWasSelected(document: pickedURL ?? info[UIImagePickerControllerReferenceURL] as! URL)
+        }
+
 
         //图片控制器退出
-        picker.dismiss(animated: true, completion:nil)
+        picker.dismiss(animated: true, completion:{})
     }
      
 	func imagePickerControllerDidCancel(_ picker: UIImagePickerController){
@@ -212,6 +248,21 @@ extension CDVDocumentPicker: UIImagePickerControllerDelegate, UINavigationContro
         picker.dismiss(animated: true, completion:nil)
 		sendError("User canceled.")
 	}
+    
+     func createTemporaryURLforVideoFile(url: URL) -> URL {
+        /// Create the temporary directory.
+        let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        /// create a temporary file for us to copy the video to.
+        let temporaryFileURL = temporaryDirectoryURL.appendingPathComponent(url.lastPathComponent)
+        /// Attempt the copy.
+        do {
+            try FileManager().copyItem(at: url.absoluteURL, to: temporaryFileURL)
+        } catch {
+            print("There was an error copying the video file to the temporary location.")
+        }
+
+        return temporaryFileURL as URL
+    }
 	
 //    override func didReceiveMemoryWarning() {
 //        super.didReceiveMemoryWarning()
