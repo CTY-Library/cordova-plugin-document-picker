@@ -123,10 +123,33 @@ public class CDVDocumentPicker extends CordovaPlugin {
             this.allowEdit = false;
 
             try {
-                    // FIXME: Stop always requesting the permission
+                int isPermission = 1; //有权限
+
+                List<String> permissions = new ArrayList<String>();
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // Android API 33 and higher
+                    permissions.add(Manifest.permission.READ_MEDIA_IMAGES);
+                    if(!PermissionHelper.hasPermission(this, Manifest.permission.READ_MEDIA_IMAGES)) {
+                        isPermission = 0;
+                    }
+                } else {
+                    // Android API 32 or lower
+                    permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
                     if(!PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        PermissionHelper.requestPermission(this, SAVE_TO_ALBUM_SEC, Manifest.permission.READ_EXTERNAL_STORAGE);
-                    } else {
+                        isPermission = 0;
+                    }
+                }
+
+
+                    // FIXME: Stop always requesting the permission
+//                    if(!PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+//                        //PermissionHelper.requestPermission(this, SAVE_TO_ALBUM_SEC, Manifest.permission.READ_EXTERNAL_STORAGE);
+//                    }
+
+                    if(isPermission==0){
+                        cordova.requestPermissions(this, SAVE_TO_ALBUM_SEC, permissions.toArray(new String[0]));
+                    }
+                    else {
                         this.getFile(this.srcType, title);
                     }
             }
