@@ -122,7 +122,7 @@ class CDVDocumentPicker : CDVPlugin {
 			//设置image picker的用户界面
 			imagePickerController.sourceType = srcType == "PHOTOLIBRARY" ? .photoLibrary : .savedPhotosAlbum //或者.savedPhotosAlbum
 			imagePickerController.mediaTypes =  documentTypes   //[kUTTypeMovie as String]
-            imagePickerController.videoQuality = UIImagePickerControllerQualityType.typeHigh
+            imagePickerController.videoQuality = .typeHigh
             //imagePickerController.for
            // imagePickerController.mul = isMultiple;
 			//设置图片选择控制器导航栏的背景颜色
@@ -172,7 +172,7 @@ private extension CDVDocumentPicker {
 
         self.commandDelegate.send(
             result,
-            callbackId: commandCallback
+            callbackId: commandCallback!
         )
     }
 }
@@ -190,6 +190,7 @@ extension CDVDocumentPicker: UIDocumentPickerDelegate {
         }
     }
 
+    @available(iOS, introduced: 8.0, deprecated: 11.0)
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL){
         documentWasSelected(document: url)
     }
@@ -201,46 +202,40 @@ extension CDVDocumentPicker: UIDocumentPickerDelegate {
 
 extension CDVDocumentPicker: UIImagePickerControllerDelegate, UINavigationControllerDelegate{
   //选择图片成功后代理
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
- 
-//       let group = DispatchGroup();
-//        let  queueRequest = DispatchQueue.global();
-//
-//       queueRequest.async(group:group){
-            
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+
         //选择图片的引用路径
-            var pickedURL = info["UIImagePickerControllerImageURL"] as? URL
+            var pickedURL = info[.imageURL] as? URL
     //        if  pickedURL == nil {
-    //            pickedURL =  info["UIImagePickerControllerReferenceURL"] as? URL
+    //            pickedURL =  info[.referenceURL] as? URL
     //        }
     //
             if pickedURL == nil  {
-                pickedURL =  info["UIImagePickerControllerMediaURL"] as? URL
+                pickedURL =  info[.mediaURL] as? URL
             }
         if #available(iOS 13.0, *), self.isCompress {
-                pickedURL = self.createTemporaryURLforVideoFile(url: pickedURL as! URL)
+                pickedURL = self.createTemporaryURLforVideoFile(url: pickedURL ?? URL(fileURLWithPath: ""))
         }
-        
-        if #available(iOS 13.0, *), self.isCompress == false {
-                if let phasset = info["UIImagePickerControllerPHAsset"] as? PHAsset {
-                   PHCachingImageManager().requestAVAsset(forVideo: phasset as PHAsset, options:nil, resultHandler: { (asset, audioMix, info) in
 
-                        let avurl = asset as! AVURLAsset;
-                        self.documentWasSelected(document: avurl.url )
-                   })
-                }
-        }
-        else{
-            if pickedURL == nil {
-                self.sendError("No File selected.")
+        // Always dismiss first, then callback — prevents the system from
+        // showing a video preview during the dismiss animation.
+        picker.dismiss(animated: true) {
+            if #available(iOS 13.0, *), self.isCompress == false {
+                    if let phasset = info[.phAsset] as? PHAsset {
+                       PHCachingImageManager().requestAVAsset(forVideo: phasset as PHAsset, options:nil, resultHandler: { (asset, audioMix, info) in
+                            let avurl = asset as! AVURLAsset;
+                            self.documentWasSelected(document: avurl.url )
+                       })
+                       return
+                    }
             }
 
-            self.documentWasSelected(document: pickedURL ?? info[UIImagePickerControllerReferenceURL] as! URL)
+            if pickedURL == nil {
+                self.sendError("No File selected.")
+                return
+            }
+            self.documentWasSelected(document: pickedURL ?? info[.referenceURL] as! URL)
         }
-
-
-        //图片控制器退出
-        picker.dismiss(animated: true, completion:{})
     }
      
 	func imagePickerControllerDidCancel(_ picker: UIImagePickerController){
